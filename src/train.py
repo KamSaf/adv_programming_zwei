@@ -1,7 +1,7 @@
 import random
 import os
 from ultralytics import YOLO
-from config import ROOT_PATH, SEED, ANNOTATIONS_FILE
+from config import ROOT_PATH, ANNOTATIONS_FILE
 from utils import create_dir, copy_dataset
 from label_data import convert_labels
 
@@ -14,7 +14,6 @@ def split_datasets(
 ) -> None:
     for dir in (train_ds_path, test_ds_path):
         create_dir(dir)
-    random.seed(SEED)
     files_list = os.listdir(data_path)
     random.shuffle(files_list)
     ds_len = len(files_list)

@@ -1,4 +1,5 @@
 venv
 images/*
 data/
-*.pyc
+__pycache__
+runs

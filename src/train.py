@@ -1,7 +1,9 @@
 import random
 import os
-from config import ROOT_PATH, SEED
+from ultralytics import YOLO
+from config import ROOT_PATH, SEED, ANNOTATIONS_FILE
 from utils import create_dir, copy_dataset
+from label_data import convert_labels
 
 
 def split_datasets(
@@ -23,5 +25,12 @@ def split_datasets(
     copy_dataset(data_path, test_ds, test_ds_path)
 
 
+def train() -> None:
+    model = YOLO("yolo11n.pt")
+    model.train(data="data.yaml", epochs=50, imgsz=640, cache=True, workers=8)
+
+
 if __name__ == "__main__":
-    split_datasets(ROOT_PATH + "/data/photos/")
+    convert_labels(ANNOTATIONS_FILE)
+    split_datasets(data_path=ROOT_PATH + "/data/photos/")
+    train()

@@ -2,7 +2,7 @@ import os
 import random
 
 ROOT_PATH = "/".join(os.path.abspath(__file__).split("/")[:-2]) + "/"
-SEED = 8675309
+SEED = 98765
 ANNOTATIONS_FILE = "annotations.xml"
 
 random.seed(SEED)

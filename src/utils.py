@@ -35,7 +35,7 @@ def copy_dataset(
     src: str,
     file_names: list[str],
     dest: str,
-    labels_path: str = ROOT_PATH + "/data/labels/",
+    labels_path: str = ROOT_PATH + "data/labels/",
 ) -> None:
     purge_dir(dest)
     for file_n in file_names:

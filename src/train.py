@@ -9,8 +9,8 @@ from label_data import convert_labels
 def split_datasets(
     data_path: str,
     ds_split_ratio: float = 0.3,
-    train_ds_path: str = ROOT_PATH + "/data/train/",
-    test_ds_path: str = ROOT_PATH + "/data/test/",
+    train_ds_path: str = ROOT_PATH + "data/train/",
+    test_ds_path: str = ROOT_PATH + "data/test/",
 ) -> None:
     for dir in (train_ds_path, test_ds_path):
         create_dir(dir)
@@ -32,5 +32,5 @@ def train() -> None:
 
 if __name__ == "__main__":
     convert_labels(ANNOTATIONS_FILE)
-    split_datasets(data_path=ROOT_PATH + "/data/photos/")
+    split_datasets(data_path=ROOT_PATH + "data/photos/")
     train()

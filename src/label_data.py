@@ -25,9 +25,7 @@ def parse_xml(xml_path: str) -> None:
     return labels
 
 
-def convert_labels(
-    xml_file: str, output_dir: str = ROOT_PATH + "/data/labels/"
-) -> None:
+def convert_labels(xml_file: str, output_dir: str = ROOT_PATH + "data/labels/") -> None:
     xml_path = ROOT_PATH + "/data/" + xml_file
     labels = parse_xml(xml_path)
     purge_dir(output_dir)
@@ -39,5 +37,5 @@ def convert_labels(
 
 if __name__ == "__main__":
     xml_file_name = "annotations.xml"
-    annotations_path = f"{ROOT_PATH}/data/{xml_file_name}"
+    annotations_path = f"{ROOT_PATH}data/{xml_file_name}"
     convert_labels(annotations_path)

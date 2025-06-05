@@ -1,5 +1,7 @@
 import os
 from shutil import copyfile
+from cv2 import resize
+from cv2.typing import MatLike
 from config import ROOT_PATH
 
 
@@ -42,3 +44,7 @@ def copy_dataset(
         copy_file(src + file_n, dest + file_n)
         label_name = file_n[:-3] + "txt"
         copy_file(labels_path + label_name, dest + label_name)
+
+
+def resize_img(img: MatLike, multipl: int = 4) -> MatLike:
+    return resize(img, (img.shape[1] // multipl, img.shape[0] // multipl))

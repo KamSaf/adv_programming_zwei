@@ -1,5 +1,6 @@
 import os
 from shutil import copyfile
+from config import ROOT_PATH
 
 
 def create_dir(directory: str) -> None:
@@ -30,8 +31,14 @@ def purge_dir(path: str) -> None:
             os.remove(file_path)
 
 
-def copy_dataset(src: str, file_names: list[str], dest: str) -> None:
-    print(len(file_names))
-    print(dest)
+def copy_dataset(
+    src: str,
+    file_names: list[str],
+    dest: str,
+    labels_path: str = ROOT_PATH + "/data/labels/",
+) -> None:
+    purge_dir(dest)
     for file_n in file_names:
         copy_file(src + file_n, dest + file_n)
+        label_name = file_n[:-3] + "txt"
+        copy_file(labels_path + label_name, dest + label_name)

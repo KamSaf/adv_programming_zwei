@@ -1,4 +1,5 @@
 import os
+from shutil import copyfile
 
 
 def create_dir(directory: str) -> None:
@@ -14,3 +15,23 @@ def norm_size(c1: str, c2: str, dim: str) -> float:
 def norm_coord(c1: str, c2: str, dim: str) -> float:
     f_c1, f_c2, f_dim = map(float, (c1, c2, dim))
     return ((f_c2 + f_c1) / 2) / f_dim
+
+
+def copy_file(src: str, dest: str) -> None:
+    dir = "/".join(dest.split("/")[:-1])
+    create_dir(dir)
+    copyfile(src, dest)
+
+
+def purge_dir(path: str) -> None:
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
+
+def copy_dataset(src: str, file_names: list[str], dest: str) -> None:
+    print(len(file_names))
+    print(dest)
+    for file_n in file_names:
+        copy_file(src + file_n, dest + file_n)

@@ -6,11 +6,8 @@ import cv2
 from cv2.typing import MatLike
 import pytesseract
 import imutils
-from config import ROOT_PATH, ANNOTATIONS_FILE
+from config import ROOT_PATH, ANNOTATIONS_FILE, CHARS_MAP, REV_CHARS_MAP
 from detect import predict
-
-CHARS_MAP = {"1": "I", "2": "Z", "3": "C", "5": "S", "0": "O", "7": "Z"}
-REV_CHARS_MAP = {"I": "1", "Z": "2", "C": "3", "S": "5", "O": "0"}
 
 
 def replace_chars(text: str, split: int | None, rev: bool = False) -> str:
@@ -66,22 +63,17 @@ def process_text(text: str) -> str:
 
 
 def process_image(img: MatLike) -> Tuple[str, MatLike]:
+    # assuming we detect POLISH license plates (!!!) and that we only read plates for recognision
     img = imutils.resize(img, width=500)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.bilateralFilter(gray, 11, 41, 21)
     _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
     inv = cv2.bitwise_not(thresh)
-    # crop = inv[2 : inv.shape[0] - 25, 50 : inv.shape[1] - 20]
-    # cv2.imshow("crop", crop)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
     config = "--oem 3 --psm 8 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     plate_number = pytesseract.image_to_string(inv, config=config)
     unpr_text = plate_number.strip()
-    # assuming we detect POLISH license plates (!!!) and that we only read plates for recognision
     for i in range(2):
         pr_text = process_text(unpr_text)
-
     return unpr_text, pr_text, inv
 
 

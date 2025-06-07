@@ -15,7 +15,7 @@ def predict(
     Parameters:
         img_path (str): path to image which is to be processed
 
-        weights (str): path to YOLO11n weights (optional)
+        weights (str): path to YOLO11n weights
 
         show_result (bool): bool flag determining whether image with marked bbox should be displayed
 

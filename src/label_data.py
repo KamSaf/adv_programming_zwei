@@ -42,7 +42,7 @@ def convert_labels(xml_path: str, output_dir: str = ROOT_PATH + "data/labels/") 
     Parameters:
         xml_file (str): path to .xml file with labels
 
-        output_dir (str): path to directory where labels are supposed to be saved in (optional)
+        output_dir (str): path to directory where labels are supposed to be saved in
     """
     labels = parse_xml(xml_path)
     purge_dir(output_dir)

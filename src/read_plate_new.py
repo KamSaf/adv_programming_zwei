@@ -1,3 +1,5 @@
+import threading
+from queue import Queue
 import random
 import timeit
 import xml.etree.ElementTree as ET
@@ -109,7 +111,7 @@ def run(data: list, n: int = 100) -> None:
         res1, res2 = res[0], res[1]
         if num in res1 or num in res2:
             good += 1
-    return good / n
+    return good
 
 
 def calculate_final_grade(accuracy_percent: float, processing_time_sec: float) -> float:
@@ -127,15 +129,42 @@ def calculate_final_grade(accuracy_percent: float, processing_time_sec: float) -
     time_norm = (60 - processing_time_sec) / 50
     score = 0.7 * accuracy_norm + 0.3 * time_norm
     grade = 2.0 + 3.0 * score
+    print(grade)
     return round(grade * 2) / 2
 
 
+def worker(subdata, results, data_size):
+    acc = run(subdata, data_size)
+    results.append(acc)
+
+
 if __name__ == "__main__":
-    data = get_plate_data(f"{ROOT_PATH}data/{ANNOTATIONS_FILE}")
+    DATA_SIZE = 100
+    NUM_THREADS = 4
+    data = get_plate_data(f"{ROOT_PATH}data/{ANNOTATIONS_FILE}", DATA_SIZE)
+
+    chunk_size = len(data) // NUM_THREADS
+    threads = []
+    results = []
+
     s = timeit.default_timer()
-    acc = run(data)
+
+    for i in range(NUM_THREADS):
+        start = i * chunk_size
+        end = (i + 1) * chunk_size if i != NUM_THREADS - 1 else len(data)
+        thread = threading.Thread(
+            target=worker, args=(data[start:end], results, DATA_SIZE / NUM_THREADS)
+        )
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
     e = timeit.default_timer()
-    time = e - s
-    print(f"accuracy: {acc*100}")
-    print(f"exec time: {time}")
-    print(f"grade: {calculate_final_grade(acc*100, time)}")
+    time_exec = e - s
+    acc = sum(results) / DATA_SIZE
+
+    print(f"accuracy: {acc * 100:.2f}%")
+    print(f"exec time: {time_exec:.2f}s")
+    print(f"grade: {calculate_final_grade(acc * 100, time_exec)}")

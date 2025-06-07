@@ -1,9 +1,7 @@
 import threading
-from queue import Queue
 import random
 import timeit
 import xml.etree.ElementTree as ET
-from typing import Tuple
 import cv2
 from cv2.typing import MatLike
 import pytesseract
@@ -13,6 +11,23 @@ from detect import predict
 
 
 def replace_chars(text: str, split: int | None, rev: bool = False) -> str:
+    """
+    Function replacing characters with their corresponding equivalents
+    defined in maps defined in config.py in whole string or substring
+    defined with split value.
+
+    Parameters:
+        text (str): original text to be processed
+
+        split (int): index by which text is to be split (if not given then whole text is processed)
+
+        rev (bool): if set to True then reverse char map is used (chars to numbers)
+
+    Returns:
+        result (str): text with replaced characters
+    """
+    if split > len(text):
+        return text
     c_map = CHARS_MAP if not rev else REV_CHARS_MAP
     if split is None:
         for c in text:
@@ -27,6 +42,16 @@ def replace_chars(text: str, split: int | None, rev: bool = False) -> str:
 
 
 def process_text(text: str) -> str:
+    """
+    Function cleaning up recognised license plate number utilising rules
+    which apply in polish license plate numbers.
+
+    Parameters:
+        text (str): text to be cleaned up
+
+    Returns:
+        result (str): cleaned up text after rules application
+    """
     if len(text) < 4:
         return ""
     if text[0] in "AIM0123456789":
@@ -64,8 +89,17 @@ def process_text(text: str) -> str:
     return text
 
 
-def process_image(img: MatLike) -> Tuple[str, MatLike]:
-    # assuming we detect POLISH license plates (!!!) and that we only read plates for recognision
+def process_image(img: MatLike) -> tuple[str, str]:
+    """
+    Function processing given cropped image, retrieving
+    and cleaning up license plate numbers from it.
+
+    Parameters:
+        img (MatLike): cropped image of license plate
+
+    Returns:
+        result (tuple[str, str]): tuple of non-cleaned up and cleaned up license plate numbers
+    """
     img = imutils.resize(img, width=500)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.bilateralFilter(gray, 11, 41, 21)
@@ -75,11 +109,20 @@ def process_image(img: MatLike) -> Tuple[str, MatLike]:
     plate_number = pytesseract.image_to_string(inv, config=config)
     unpr_text = plate_number.strip()
     for i in range(2):
+        # assuming we detect POLISH license plates (!!!) and that we only read plates for recognision
         pr_text = process_text(unpr_text)
-    return unpr_text, pr_text, inv
+    return unpr_text, pr_text
 
 
-def get_plate_data(xml_path: str, n: int = 100) -> None:
+def get_plate_data(xml_path: str, n: int = 100) -> list[MatLike]:
+    """
+    Function preparing dataset to perform detection.
+
+    Parameters:
+        xml_path (str): path to .xml file with annotations
+
+        n (int): length of images list to be processed
+    """
     tree = ET.parse(xml_path)
     root = tree.getroot()
     data = [
@@ -91,25 +134,43 @@ def get_plate_data(xml_path: str, n: int = 100) -> None:
     return data[:n]
 
 
-def read_plate(img_name: str) -> str:
+def read_plate(img_name: str) -> tuple[str, str]:
+    """
+    Function reading license plate number from an image.
+
+    Parameters:
+        img_name (str): name of image to be processed
+
+    Returns:
+        result (tuple[str, str]): tuple of non-cleaned up and cleaned up license plate numbers
+    """
     img_path = f"{ROOT_PATH}data/photos/{img_name}"
     coord = predict(img_path)
     if not coord:
-        return ""
+        return ("", "")
     xtl, ytl, xbr, ybr = coord
     crop = cv2.imread(img_path)[ytl:ybr, xtl:xbr]
-    unpr_plate_num, pr_plate_number, _ = process_image(crop)
+    unpr_plate_num, pr_plate_number = process_image(crop)
     return unpr_plate_num, pr_plate_number
 
 
-def run(data: list, n: int = 100) -> None:
+def run(data: list[MatLike]) -> int:
+    """
+    Function firing up detection and OCR on list of images
+    and counting number of good readings.
+
+    Parameters:
+        data (list[MatLike]): list of images to be processed
+
+    Returns:
+        result (int): number of good results
+    """
     good = 0
     for img, num in data:
         res = read_plate(img)
         if not res:
             continue
-        res1, res2 = res[0], res[1]
-        if num in res1 or num in res2:
+        if num in res[0] or num in res[1]:
             good += 1
     return good
 
@@ -133,9 +194,16 @@ def calculate_final_grade(accuracy_percent: float, processing_time_sec: float) -
     return round(grade * 2) / 2
 
 
-def worker(subdata, results, data_size):
-    acc = run(subdata, data_size)
-    results.append(acc)
+def worker(subdata: list[MatLike], results: list[int]) -> None:
+    """
+    Function starting multithreading worker.
+
+    Parameters:
+        subdata (list[MatLike]): subset of list of images to process
+
+        resutls (list[int]): reference to list of worker results
+    """
+    results.append(run(subdata))
 
 
 if __name__ == "__main__":
@@ -152,9 +220,7 @@ if __name__ == "__main__":
     for i in range(NUM_THREADS):
         start = i * chunk_size
         end = (i + 1) * chunk_size if i != NUM_THREADS - 1 else len(data)
-        thread = threading.Thread(
-            target=worker, args=(data[start:end], results, DATA_SIZE / NUM_THREADS)
-        )
+        thread = threading.Thread(target=worker, args=(data[start:end], results))
         threads.append(thread)
         thread.start()
 

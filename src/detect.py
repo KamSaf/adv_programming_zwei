@@ -22,7 +22,6 @@ def predict(
     Returns:
         result (tuple[float, float, float, float] | None):
         tuple with bbox coordinates or None if bbox was not found
-
     """
     model = YOLO(weights)
     results = model.predict(source=img_path, verbose=False)[0]

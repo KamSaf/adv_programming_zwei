@@ -11,7 +11,7 @@ def parse_xml(xml_path: str) -> dict[str, tuple[float, float, float, float]]:
         xml_path (str): path to .xml file containing labels
 
     Returns:
-        result (dict[str, tuple[float, float, float]]):
+        labels (dict[str, tuple[float, float, float]]):
         dictonary with file name as key and YOLO format label as value
     """
     tree = ET.parse(xml_path)

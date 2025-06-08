@@ -20,7 +20,7 @@ def predict(
         show_result (bool): bool flag determining whether image with marked bbox should be displayed
 
     Returns:
-        result (tuple[float, float, float, float] | None):
+        bbox_coord (tuple[float, float, float, float] | None):
         tuple with bbox coordinates or None if bbox was not found
     """
     model = YOLO(weights)

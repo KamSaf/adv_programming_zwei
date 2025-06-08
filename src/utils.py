@@ -28,7 +28,7 @@ def norm_size(c1: str, c2: str, dim: str) -> float:
         dim (str): dimension of an image
 
     Returns:
-        result (float): normalised dimension of a figure
+        norm_size (float): normalised dimension of a figure
     """
     f_c1, f_c2, f_dim = map(float, (c1, c2, dim))
     return (f_c2 - f_c1) / f_dim
@@ -47,7 +47,7 @@ def norm_coord(c1: str, c2: str, dim: str) -> float:
         dim (str): dimension of and image
 
     Returns:
-        result (float): normalised center of figure dimension
+        norm_coord (float): normalised center of figure dimension
 
     """
     f_c1, f_c2, f_dim = map(float, (c1, c2, dim))
@@ -136,7 +136,7 @@ def replace_chars(text: str, split: int | None, rev: bool = False) -> str:
         rev (bool): if set to True then reverse char map is used (chars to numbers)
 
     Returns:
-        result (str): text with replaced characters
+        repl_text (str): text with replaced characters
     """
     if split > len(text):
         return text

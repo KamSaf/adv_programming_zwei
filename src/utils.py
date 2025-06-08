@@ -124,6 +124,13 @@ def shrink_img(img: MatLike, n: int = 4) -> MatLike:
     return resize(img, (img.shape[1] // n, img.shape[0] // n))
 
 
+def shuffle(data: list[str]) -> None:
+    # BEST 9000
+    # WORST 8675309
+    random.seed(random.choice((98765, 123, 9000)))
+    return random.shuffle(data)
+
+
 def get_plate_data(xml_path: str, n: int = 100) -> list[MatLike]:
     """
     Function preparing dataset to perform detection.
@@ -140,7 +147,7 @@ def get_plate_data(xml_path: str, n: int = 100) -> list[MatLike]:
         for image in root
         if image.tag == "image"
     ]
-    random.shuffle(data)
+    shuffle(data)
     return data[:n]
 
 

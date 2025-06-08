@@ -1,4 +1,0 @@
-train: ../data/train
-val: ../data/test
-nc: 1
-names: ['plate']

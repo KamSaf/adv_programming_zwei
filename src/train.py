@@ -5,8 +5,9 @@ from config import (
     ANNOTATIONS_FILE,
     TRAIN_DATASET_PATH,
     TEST_DATASET_PATH,
-    WEIGHTS_PATH,
     DATASET_PATH,
+    MODEL_PATH,
+    MODEL_CONFIG_PATH,
 )
 from utils import create_dir, copy_dataset
 from label_data import convert_labels
@@ -47,8 +48,8 @@ def train() -> None:
     """
     Function firing up model training
     """
-    model = YOLO(WEIGHTS_PATH)
-    model.train(data="data.yaml", epochs=50, imgsz=640, cache=True, workers=8)
+    model = YOLO(MODEL_PATH)
+    model.train(data=MODEL_CONFIG_PATH, epochs=50, imgsz=640, cache=True, workers=8)
 
 
 if __name__ == "__main__":

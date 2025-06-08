@@ -1,7 +1,7 @@
 import threading
 import timeit
 from cv2.typing import MatLike
-from config import ROOT_PATH, ANNOTATIONS_FILE, DATA_SIZE, NUM_THREADS
+from config import ANNOTATIONS_FILE, DATA_SIZE, NUM_THREADS
 from ocr import read_plate
 from utils import evaluate, get_plate_data
 
@@ -64,7 +64,7 @@ def worker(subdata: list[MatLike], results: list[int]) -> None:
 
 
 if __name__ == "__main__":
-    data = get_plate_data(f"{ROOT_PATH}data/{ANNOTATIONS_FILE}", DATA_SIZE)
+    data = get_plate_data(ANNOTATIONS_FILE, DATA_SIZE)
     chunk_size = len(data) // NUM_THREADS
     threads = []
     results = []

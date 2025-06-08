@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from config import ROOT_PATH, ANNOTATIONS_FILE
+from config import ANNOTATIONS_FILE, LABELS_PATH
 from utils import norm_coord, norm_size, create_dir, purge_dir
 
 
@@ -35,7 +35,7 @@ def parse_xml(xml_path: str) -> dict[str, tuple[float, float, float, float]]:
     return labels
 
 
-def convert_labels(xml_path: str, output_dir: str = ROOT_PATH + "data/labels/") -> None:
+def convert_labels(xml_path: str, output_dir: str = LABELS_PATH) -> None:
     """
     Function converting XML labels to YOLO style labels and saving them to separate .txt files.
 
@@ -45,13 +45,13 @@ def convert_labels(xml_path: str, output_dir: str = ROOT_PATH + "data/labels/") 
         output_dir (str): path to directory where labels are supposed to be saved in
     """
     labels = parse_xml(xml_path)
-    purge_dir(output_dir)
     create_dir(output_dir)
+    purge_dir(output_dir)
     for f_name, label in labels.items():
         with open(output_dir + f_name, "w") as f:
             f.write(" ".join(["0"] + list(map(str, label))))
 
 
 if __name__ == "__main__":
-    annotations_path = f"{ROOT_PATH}data/{ANNOTATIONS_FILE}"
+    annotations_path = ANNOTATIONS_FILE
     convert_labels(annotations_path)

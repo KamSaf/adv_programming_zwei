@@ -1,7 +1,13 @@
 import random
 import os
 from ultralytics import YOLO
-from config import ROOT_PATH, ANNOTATIONS_FILE
+from config import (
+    ANNOTATIONS_FILE,
+    TRAIN_DATASET_PATH,
+    TEST_DATASET_PATH,
+    WEIGHTS_PATH,
+    DATASET_PATH,
+)
 from utils import create_dir, copy_dataset
 from label_data import convert_labels
 
@@ -9,8 +15,8 @@ from label_data import convert_labels
 def split_datasets(
     data_path: str,
     ds_split_ratio: float = 0.3,
-    train_ds_path: str = ROOT_PATH + "data/train/",
-    test_ds_path: str = ROOT_PATH + "data/test/",
+    train_ds_path: str = TRAIN_DATASET_PATH,
+    test_ds_path: str = TEST_DATASET_PATH,
 ) -> None:
     """
     Function splitting whole dataset into train and test sections
@@ -41,11 +47,11 @@ def train() -> None:
     """
     Function firing up model training
     """
-    model = YOLO("yolo11n.pt")
+    model = YOLO(WEIGHTS_PATH)
     model.train(data="data.yaml", epochs=50, imgsz=640, cache=True, workers=8)
 
 
 if __name__ == "__main__":
     convert_labels(ANNOTATIONS_FILE)
-    split_datasets(data_path=ROOT_PATH + "data/photos/")
+    split_datasets(data_path=DATASET_PATH)
     train()

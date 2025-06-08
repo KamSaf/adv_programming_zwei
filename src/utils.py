@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 from shutil import copyfile
 from cv2 import resize
 from cv2.typing import MatLike
-from config import ROOT_PATH, CHARS_MAP, REV_CHARS_MAP
+from config import CHARS_MAP, REV_CHARS_MAP, LABELS_PATH
 
 
 def create_dir(directory: str) -> None:
@@ -79,7 +79,7 @@ def purge_dir(path: str) -> None:
         path (str): path to directory which is to be purged
     """
     for filename in os.listdir(path):
-        file_path = os.path.join(path, filename)
+        file_path = path + filename
         if os.path.isfile(file_path):
             os.remove(file_path)
 
@@ -88,7 +88,7 @@ def copy_dataset(
     src: str,
     file_names: list[str],
     dest: str,
-    labels_path: str = ROOT_PATH + "data/labels/",
+    labels_path: str = LABELS_PATH,
 ) -> None:
     """
     Function copying given images with their labels to new directory.
@@ -102,6 +102,7 @@ def copy_dataset(
 
         labels_path (str): path to directory containing .txt labels
     """
+    create_dir(LABELS_PATH)
     purge_dir(dest)
     for file_n in file_names:
         copy_file(src + file_n, dest + file_n)
@@ -128,7 +129,7 @@ def shuffle(data: list[str]) -> None:
     # BEST 9000
     # WORST 8675309
     random.seed(random.choice((98765, 123, 9000)))
-    return random.shuffle(data)
+    random.shuffle(data)
 
 
 def get_plate_data(xml_path: str, n: int = 100) -> list[MatLike]:

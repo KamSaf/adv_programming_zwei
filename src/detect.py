@@ -1,11 +1,12 @@
 import cv2
 from ultralytics import YOLO
 from utils import shrink_img
+from config import WEIGHTS_PATH, DATASET_PATH
 
 
 def predict(
     img_path: str,
-    weights: str = "runs/detect/train/weights/best.pt",
+    weights: str = WEIGHTS_PATH,
     show_result: bool = False,
 ) -> tuple[float, float, float, float] | None:
     """
@@ -39,4 +40,4 @@ def predict(
 
 
 if __name__ == "__main__":
-    print(predict("../data/photos/110.jpg", show_result=True))
+    print(predict(f"{DATASET_PATH}110.jpg", show_result=True))

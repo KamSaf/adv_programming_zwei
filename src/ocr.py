@@ -2,7 +2,7 @@ import cv2
 from cv2.typing import MatLike
 import pytesseract
 import imutils
-from config import ROOT_PATH
+from config import DATASET_PATH
 from detect import predict
 
 
@@ -38,7 +38,7 @@ def read_plate(img_name: str) -> tuple[str, str]:
     Returns:
         num_plate (str): license plate number
     """
-    img_path = f"{ROOT_PATH}data/photos/{img_name}"
+    img_path = f"{DATASET_PATH}{img_name}"
     coord = predict(img_path)
     if not coord:
         return ("", "")

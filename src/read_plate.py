@@ -99,13 +99,15 @@ def read_plate(img_name: str) -> tuple[str, str]:
     return unpr_plate_num, pr_plate_number
 
 
-def run(data: list[MatLike]) -> int:
+def run(data: list[MatLike], verbose: bool = False) -> int:
     """
     Function firing up detection and OCR on list of images
     and counting number of good readings.
 
     Parameters:
         data (list[MatLike]): list of images to be processed
+
+        verbose (bool): if set to true recognised plates will be printed
 
     Returns:
         result (int): number of good results
@@ -115,6 +117,8 @@ def run(data: list[MatLike]) -> int:
         res = read_plate(img)
         if not res:
             continue
+        if verbose:
+            print(num, res, num in res[0] or num in res[1])
         if num in res[0] or num in res[1]:
             good += 1
     return good
@@ -148,7 +152,7 @@ def worker(subdata: list[MatLike], results: list[int]) -> None:
 
         resutls (list[int]): reference to list of worker results
     """
-    results.append(run(subdata))
+    results.append(run(subdata, False))
 
 
 if __name__ == "__main__":

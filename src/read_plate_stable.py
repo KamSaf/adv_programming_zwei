@@ -54,9 +54,11 @@ def process_text(text: str) -> str:
     """
     if len(text) < 4:
         return ""
-    while text[0] in "AIM0123456789":
-        text = text[1:]
-    if text[1:3] != "BI" and text[0] == "B":
+    while len(text) > 8 and text[0] in "0123456789":
+        text = CHARS_MAP[text[0]] + text[1:]
+        if text[0] in "AIM0123456789" or (text[1:3] != "BI" and text[0] == "B"):
+            text = text[1:]
+    while text[0] in "AIM0123456789" or (text[1:3] != "BI" and text[0] == "B"):
         text = text[1:]
     if len(text) == 8:
         text = replace_chars(text, 3)

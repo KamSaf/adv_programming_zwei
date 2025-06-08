@@ -54,10 +54,23 @@ def process_text(text: str) -> str:
     """
     if len(text) < 4:
         return ""
-    while text[0] in "AIM0123456789":
+    if text[0] in "AIM0123456789":
         text = text[1:]
     if text[1:3] != "BI" and text[0] == "B":
         text = text[1:]
+    # text = text[:8]
+    # # if len(text) > 8:
+    # #     text = text[:8]
+    # if text[:2].isalnum() and not text[2].isalnum() and len(text) > 7:
+    #     text = text[:8]
+    # elif text[:3].isalnum() and not text[3].isalnum() and len(text) > 8:
+    #     text = text[:8]
+    # # if text[:2].isalnum() and not text[2].isalnum():
+    # #     text = text[:7]
+    # # if len(text) == 7 and text[0].isalnum() and not text[1].isalnum():
+    # #     text = "".join([text[0], CHARS_MAP[text[1]], text[2:]])
+    # # if len(text) > 8 and text[:3].isalnum() and not text[3].isalnum():
+    # #     text = text[:8]
     if len(text) == 8:
         text = replace_chars(text, 3)
     if len(text) == 7:
@@ -76,11 +89,16 @@ def process_image(img: MatLike) -> tuple[str, str]:
     Returns:
         result (tuple[str, str]): tuple of non-cleaned up and cleaned up license plate numbers
     """
+    img = img[0 : img.shape[0], int(0.07 * img.shape[1]) : img.shape[1]]
     img = imutils.resize(img, width=500)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.bilateralFilter(gray, 11, 41, 21)
-    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    (_, thresh) = cv2.threshold(gray, 90, 255, cv2.THRESH_BINARY_INV)
+    # _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
     inv = cv2.bitwise_not(thresh)
+    # cv2.imshow("crop", inv)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     config = "--oem 3 --psm 8 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     plate_number = pytesseract.image_to_string(inv, config=config)
     unpr_text = plate_number.strip()
@@ -145,7 +163,8 @@ def run(data: list[MatLike]) -> int:
         res = read_plate(img)
         if not res:
             continue
-        if num in res[0] or num in res[1]:
+        print(num, res)
+        if num == res[0] or num == res[1]:
             good += 1
     return good
 
@@ -182,6 +201,7 @@ def worker(subdata: list[MatLike], results: list[int]) -> None:
 
 
 if __name__ == "__main__":
+    # for i in range(10):
     DATA_SIZE = 100
     NUM_THREADS = 4
     data = get_plate_data(f"{ROOT_PATH}data/{ANNOTATIONS_FILE}", DATA_SIZE)
@@ -209,3 +229,70 @@ if __name__ == "__main__":
     print(f"accuracy: {acc * 100:.2f}%")
     print(f"exec time: {time_exec:.2f}s")
     print(f"grade: {calculate_final_grade(acc * 100, time_exec)}")
+# print(read_plate("../data/photos/111.jpg"))
+
+
+def alt_process_text(text: str) -> str:
+    """
+    Function cleaning up recognised license plate number utilising rules
+    which apply in polish license plate numbers.
+
+    Parameters:
+        text (str): text to be cleaned up
+
+    Returns:
+        result (str): cleaned up text after rules application
+    """
+    if len(text) < 4:
+        return ""
+    if text[0] in "AIM0123456789":
+        text = text[1:]
+    if text[1:3] != "BI" and text[0] == "B":
+        text = text[1:]
+    # text = text[:8]
+    # # if len(text) > 8:
+    # #     text = text[:8]
+    # if text[:2].isalnum() and not text[2].isalnum() and len(text) > 7:
+    #     text = text[:8]
+    # elif text[:3].isalnum() and not text[3].isalnum() and len(text) > 8:
+    #     text = text[:8]
+    # # if text[:2].isalnum() and not text[2].isalnum():
+    # #     text = text[:7]
+    # # if len(text) == 7 and text[0].isalnum() and not text[1].isalnum():
+    # #     text = "".join([text[0], CHARS_MAP[text[1]], text[2:]])
+    # # if len(text) > 8 and text[:3].isalnum() and not text[3].isalnum():
+    # #     text = text[:8]
+    if len(text) == 8:
+        text = replace_chars(text, 3)
+    if len(text) == 7:
+        text = replace_chars(text, 2)
+    return text
+
+
+def alt_process_image(img: MatLike) -> tuple[str, str]:
+    """
+    Function processing given cropped image, retrieving
+    and cleaning up license plate numbers from it.
+
+    Parameters:
+        img (MatLike): cropped image of license plate
+
+    Returns:
+        result (tuple[str, str]): tuple of non-cleaned up and cleaned up license plate numbers
+    """
+    img = img[0 : img.shape[0], int(0.07 * img.shape[1]) : img.shape[1]]
+    img = imutils.resize(img, width=500)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.bilateralFilter(gray, 11, 41, 21)
+    (_, thresh) = cv2.threshold(gray, 90, 255, cv2.THRESH_BINARY_INV)
+    # _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    inv = cv2.bitwise_not(thresh)
+    # cv2.imshow("crop", inv)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    config = "--oem 3 --psm 8 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    plate_number = pytesseract.image_to_string(inv, config=config)
+    unpr_text = plate_number.strip()
+    # assuming we detect POLISH license plates (!!!) and that we only read plates for recognision
+    pr_text = process_text(unpr_text)
+    return unpr_text, pr_text

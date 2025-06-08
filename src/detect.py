@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 import cv2
-from utils import resize_img
+from utils import shrink_img
 
 
 def predict(
@@ -31,7 +31,7 @@ def predict(
     if show_result:
         img = cv2.imread(img_path)
         cv2.rectangle(img, (xtl, ytl), (xbr, ybr), (0, 255, 0), 3)
-        res_img = resize_img(img)
+        res_img = shrink_img(img)
         cv2.imshow("Image with bbox", res_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()

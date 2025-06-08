@@ -107,7 +107,7 @@ def copy_dataset(
         copy_file(labels_path + label_name, dest + label_name)
 
 
-def resize_img(img: MatLike, n: int = 4) -> MatLike:
+def shrink_img(img: MatLike, n: int = 4) -> MatLike:
     """
     Function decreasing images size n times in both dimensions.
 

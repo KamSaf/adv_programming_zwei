@@ -6,39 +6,9 @@ import cv2
 from cv2.typing import MatLike
 import pytesseract
 import imutils
-from config import ROOT_PATH, ANNOTATIONS_FILE, CHARS_MAP, REV_CHARS_MAP
+from config import ROOT_PATH, ANNOTATIONS_FILE, CHARS_MAP
 from detect import predict
-
-
-def replace_chars(text: str, split: int | None, rev: bool = False) -> str:
-    """
-    Function replacing characters with their corresponding equivalents
-    defined in maps defined in config.py in whole string or substring
-    defined with split value.
-
-    Parameters:
-        text (str): original text to be processed
-
-        split (int): index by which text is to be split (if not given then whole text is processed)
-
-        rev (bool): if set to True then reverse char map is used (chars to numbers)
-
-    Returns:
-        result (str): text with replaced characters
-    """
-    if split > len(text):
-        return text
-    c_map = CHARS_MAP if not rev else REV_CHARS_MAP
-    if split is None:
-        for c in text:
-            if c not in c_map.keys():
-                continue
-            text = text.replace(c, c_map[c])
-        return text
-    for i, c in enumerate(text[:split]):
-        if c in c_map.keys():
-            text = "".join([text[:split].replace(c, CHARS_MAP[c]), text[split:]])
-    return text
+from utils import replace_chars
 
 
 def process_text(text: str) -> str:

@@ -2,7 +2,7 @@ import os
 from shutil import copyfile
 from cv2 import resize
 from cv2.typing import MatLike
-from config import ROOT_PATH
+from config import ROOT_PATH, CHARS_MAP, REV_CHARS_MAP
 
 
 def create_dir(directory: str) -> None:
@@ -120,3 +120,34 @@ def resize_img(img: MatLike, n: int = 4) -> MatLike:
         shrinked_image (MatLike): image shrinked n times in both dimensions
     """
     return resize(img, (img.shape[1] // n, img.shape[0] // n))
+
+
+def replace_chars(text: str, split: int | None, rev: bool = False) -> str:
+    """
+    Function replacing characters with their corresponding equivalents
+    defined in maps defined in config.py in whole string or substring
+    defined with split value.
+
+    Parameters:
+        text (str): original text to be processed
+
+        split (int): index by which text is to be split (if not given then whole text is processed)
+
+        rev (bool): if set to True then reverse char map is used (chars to numbers)
+
+    Returns:
+        result (str): text with replaced characters
+    """
+    if split > len(text):
+        return text
+    c_map = CHARS_MAP if not rev else REV_CHARS_MAP
+    if split is None:
+        for c in text:
+            if c not in c_map.keys():
+                continue
+            text = text.replace(c, c_map[c])
+        return text
+    for i, c in enumerate(text[:split]):
+        if c in c_map.keys():
+            text = "".join([text[:split].replace(c, CHARS_MAP[c]), text[split:]])
+    return text

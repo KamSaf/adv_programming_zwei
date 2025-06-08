@@ -2,4 +2,5 @@ flake8
 opencv-python
 ultralytics
 pytesseract
+imutils
 # easyocr

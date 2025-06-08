@@ -3,3 +3,5 @@ images/*
 data/
 __pycache__
 old.py
+bin
+todo.txt

@@ -1,4 +1,6 @@
 import os
+import random
+import xml.etree.ElementTree as ET
 from shutil import copyfile
 from cv2 import resize
 from cv2.typing import MatLike
@@ -122,6 +124,26 @@ def shrink_img(img: MatLike, n: int = 4) -> MatLike:
     return resize(img, (img.shape[1] // n, img.shape[0] // n))
 
 
+def get_plate_data(xml_path: str, n: int = 100) -> list[MatLike]:
+    """
+    Function preparing dataset to perform detection.
+
+    Parameters:
+        xml_path (str): path to .xml file with annotations
+
+        n (int): length of images list to be processed
+    """
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    data = [
+        (image.attrib["name"], image.find("box").find("attribute").text)
+        for image in root
+        if image.tag == "image"
+    ]
+    random.shuffle(data)
+    return data[:n]
+
+
 def replace_chars(text: str, split: int | None, rev: bool = False) -> str:
     """
     Function replacing characters with their corresponding equivalents
@@ -151,3 +173,46 @@ def replace_chars(text: str, split: int | None, rev: bool = False) -> str:
         if c in c_map.keys():
             text = "".join([text[:split].replace(c, CHARS_MAP[c]), text[split:]])
     return text
+
+
+def process_text(text: str) -> str:
+    """
+    Function cleaning up recognised license plate number utilising rules
+    which apply in polish license plate numbers.
+
+    Parameters:
+        text (str): text to be cleaned up
+
+    Returns:
+        result (str): cleaned up text after rules application
+    """
+    if len(text) < 4:
+        return ""
+    while len(text) > 8 and text[0] in "0123456789":
+        text = CHARS_MAP[text[0]] + text[1:]
+        if text[0] in "AIM0123456789" or (text[1:3] != "BI" and text[0] == "B"):
+            text = text[1:]
+    while text[0] in "AIM0123456789" or (text[1:3] != "BI" and text[0] == "B"):
+        text = text[1:]
+    if len(text) == 8:
+        text = replace_chars(text, 3)
+    if len(text) == 7:
+        text = replace_chars(text, 2)
+    return text
+
+
+def evaluate(plate_num: str, ocr_res: str) -> bool:
+    """
+    Function determining whether OCR result matches
+    real license plate number.
+
+    Parameters:
+        plate_num (str): real license plate number
+
+        ocr_res (str): result of OCR operation
+
+    Returns:
+        match (bool): comparison result
+    """
+    cleaned_up_text = process_text(ocr_res)
+    return plate_num in ocr_res or plate_num in cleaned_up_text

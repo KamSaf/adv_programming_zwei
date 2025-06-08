@@ -1,5 +1,5 @@
-from ultralytics import YOLO
 import cv2
+from ultralytics import YOLO
 from utils import shrink_img
 
 

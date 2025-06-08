@@ -45,3 +45,7 @@ def read_plate(img_name: str) -> tuple[str, str]:
     xtl, ytl, xbr, ybr = coord
     crop = cv2.imread(img_path)[ytl:ybr, xtl:xbr]
     return process_image(crop)
+
+
+if __name__ == "__main__":
+    print(read_plate("52.jpg"))

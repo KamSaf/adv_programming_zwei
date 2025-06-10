@@ -28,7 +28,7 @@ def process_image(img: MatLike) -> str:
     return text
 
 
-def read_plate(img_name: str) -> tuple[tuple[str, str], float]:
+def read_plate(img_name: str, show_iou: bool = False) -> tuple[str, str]:
     """
     Function reading license plate number from an image.
 
@@ -44,7 +44,9 @@ def read_plate(img_name: str) -> tuple[tuple[str, str], float]:
         return ("", "")
     xtl, ytl, xbr, ybr = coord
     crop = cv2.imread(img_path)[ytl:ybr, xtl:xbr]
-    return process_image(crop), iou
+    if show_iou:
+        print(iou)
+    return process_image(crop)
 
 
 if __name__ == "__main__":

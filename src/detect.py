@@ -5,18 +5,15 @@ from utils import shrink_img
 from config import WEIGHTS_PATH, DATASET_PATH, ANNOTATIONS_FILE
 
 
-def calculate_iou(boxA, boxB) -> float:
-    x_left = max(boxA[0], boxB[0])
-    y_top = max(boxA[1], boxB[1])
-    x_right = min(boxA[2], boxB[2])
-    y_bottom = min(boxA[3], boxB[3])
-    if x_right < x_left or y_bottom < y_top:
-        return 0.0
-    intersection_area = (x_right - x_left) * (y_bottom - y_top)
-    boxA_area = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
-    boxB_area = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
-    iou = intersection_area / float(boxA_area + boxB_area - intersection_area)
-    return iou
+def calculate_iou(boxA, boxB):
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2])
+    yB = min(boxA[3], boxB[3])
+    interArea = max(0, xB - xA) * max(0, yB - yA)
+    boxAArea = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
+    boxBArea = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
+    return interArea / float(boxAArea + boxBArea - interArea)
 
 
 def get_bbox(img_name: str) -> tuple[float, ...]:
@@ -28,12 +25,10 @@ def get_bbox(img_name: str) -> tuple[float, ...]:
         if image.tag != "image" or image.attrib["name"] != img_name:
             continue
         box = image.find("box")
-        bbox = (
+        bbox = tuple(
             [float(box.attrib[coord]) for coord in ("xtl", "ytl", "xbr", "ybr")]
-            if box
-            else (0, 0, 0, 0)
         )
-    return tuple(bbox)
+    return bbox
 
 
 def predict(
@@ -59,9 +54,9 @@ def predict(
     model = YOLO(weights)
     results = model.predict(source=img_path, verbose=False)[0]
     if not results:
-        return None
+        return None, 0
     xtl, ytl, xbr, ybr = map(int, results.boxes.xyxy[0])
-    img_name = img_path.split("/")[-1][:-4]
+    img_name = img_path.split("/")[-1]
     true_bbox = get_bbox(img_name)
     iou = calculate_iou(true_bbox, (xtl, ytl, xbr, ybr))
     if show_result:

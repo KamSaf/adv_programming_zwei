@@ -40,7 +40,7 @@ def run(data: list[MatLike], verbose: bool = False) -> int:
     """
     good = 0
     for img, num in data:
-        ocr_res, iou = read_plate(img)
+        ocr_res = read_plate(img)
         if not ocr_res:
             continue
         match = evaluate(num, ocr_res)
@@ -48,10 +48,10 @@ def run(data: list[MatLike], verbose: bool = False) -> int:
             print(num, ocr_res, match)
         if match:
             good += 1
-    return good, iou
+    return good
 
 
-def worker(subdata: list[MatLike], results: list[int], iou_list: list[float]) -> None:
+def worker(subdata: list[MatLike], results: list[int]) -> None:
     """
     Function starting multithreading worker.
 
@@ -60,9 +60,7 @@ def worker(subdata: list[MatLike], results: list[int], iou_list: list[float]) ->
 
         resutls (list[int]): reference to list of worker results
     """
-    res, iou = run(subdata, False)
-    results.append(res)
-    iou_list.append(iou)
+    results.append(run(subdata, False))
 
 
 if __name__ == "__main__":
@@ -70,15 +68,12 @@ if __name__ == "__main__":
     chunk_size = len(data) // NUM_THREADS
     threads = []
     results = []
-    iou_list = []
     s = timeit.default_timer()
 
     for i in range(NUM_THREADS):
         start = i * chunk_size
         end = (i + 1) * chunk_size if i != NUM_THREADS - 1 else len(data)
-        thread = threading.Thread(
-            target=worker, args=(data[start:end], results, iou_list)
-        )
+        thread = threading.Thread(target=worker, args=(data[start:end], results))
         threads.append(thread)
         thread.start()
 
@@ -88,8 +83,6 @@ if __name__ == "__main__":
     e = timeit.default_timer()
     time_exec = e - s
     acc = sum(results) / DATA_SIZE
-    avg_iou = sum(iou_list) / float(DATA_SIZE)
     print(f"accuracy: {acc * 100:.2f}%")
     print(f"exec time: {time_exec:.2f}s")
-    print(f"avg IoU: {avg_iou:.2f}%")
     print(f"grade: {calculate_final_grade(acc * 100, time_exec)}")

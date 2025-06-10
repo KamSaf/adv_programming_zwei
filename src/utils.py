@@ -18,6 +18,11 @@ def create_dir(directory: str) -> None:
         os.makedirs(directory)
 
 
+def shuffle(data: list[str]) -> None:
+    random.seed(random.choice((98765, 123, 9000)))
+    random.shuffle(data)
+
+
 def norm_size(c1: str, c2: str, dim: str) -> float:
     """
     Function normalizing size of a bounding box with image size.
@@ -123,13 +128,6 @@ def shrink_img(img: MatLike, n: int = 4) -> MatLike:
         shrinked_image (MatLike): image shrinked n times in both dimensions
     """
     return resize(img, (img.shape[1] // n, img.shape[0] // n))
-
-
-def shuffle(data: list[str]) -> None:
-    # BEST 9000
-    # WORST 8675309
-    random.seed(random.choice((98765, 123, 9000)))
-    random.shuffle(data)
 
 
 def get_plate_data(xml_path: str, n: int = 100) -> list[MatLike]:
